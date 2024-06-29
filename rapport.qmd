@@ -1,0 +1,642 @@
+---
+title: "Rapport du projet en programmation R"
+author: "Trabelsi Foued & Abderrazek Rania"
+format: pdf
+editor: visual
+---
+
+![](images/ligne-bleue-1.png){fig-align="center"}
+
+![](images/images.png){fig-align="center" width="188"}
+
+> **Année universitaire :** 2023 /2024
+>
+> **Sous la superivison de :** Mme Rihab Mersni
+>
+> **Membres du groupe :**
+>
+> -   Trabelsi Foued
+>
+> -   Abderrrazek Rania
+>
+> **Classe :** IGL3
+
+![](images/ligne-bleue-1-01.png){fig-align="center"}
+
+![](images/ligne-bleue-1.png){fig-align="center"}
+
+## SOMMAIRE :
+
+**1-Introduction** .................................................................................................................. page 2
+
+**2-Processus du développement de projet** ......................................................... page 3
+
+**3-Analyse , Visualisation & interpretation des resultats**............................. page 8
+
+-   Le volumes des précipitations et le remplissage des barrages ........................ page 8
+
+    -   volumes des précipitations ............................................................................... page 8
+
+    -   remplissage des barrages ................................................................................ page13
+
+-   Rapport entre les précipitations et le remplissage des barrages................... page 14
+
+-   Repartition des utilisations principales de l’eau ........................................... page 17
+
+-   Tarification de la SONEDE ..................................................................................... page 19
+
+-   Production des céréales ......................................................................................... page 22
+
+**4 -Des prédictions** ........................................................................................................ page 23
+
+**5- Solutions** ...................................................................................................................... page 27
+
+**6- Conclusion** .................................................................................................................. page 29
+
+**7- Bibliographie** ............................................................................................................. page 30
+
+![](images/ligne-bleue-1-02.png){fig-align="center"}
+
+## **1-Introduction :**
+
+| L'eau est une ressource vitale pour la vie et le développement socio-économique. En Tunisie, un pays caractérisé par un climat méditerranéen semi-aride, la gestion efficace de l'eau revêt une importance cruciale pour assurer la sécurité alimentaire, garantir l'accès à l'eau potable et promouvoir le développement durable. Dans ce contexte, notre projet vise à analyser l'impact des précipitations sur les ressources en eau en Tunisie, en mettant en évidence le rôle critique du remplissage des barrages et ses implications dans divers secteurs. Nous examinerons également les répercussions de ces conditions hydrologiques sur la consommation quotidienne en eau, l'agriculture et l'économie nationale.
+| Cette analyse approfondie nous permettra de mieux comprendre les défis liés à la disponibilité de l'eau dans le pays et d'identifier des stratégies pour une gestion durable des ressources en eau.
+
+## [**2-Processus du développement de projet :**]{.underline}
+
+![](images/process.png){fig-align="center"}
+
+### [**Collecte des Données :**]{.underline}
+
+Dans cette étape, on a recherché des sources fiables et pertinentes pour les données économiques qui repondent a notre sujet .
+
+~*( Toutes les sources utilisées sont mentionnées dans la partie bibliographie).*~
+
+On a sélectionné les ensembles de données correspondant à notre domaine d'intérêt et à notre objectif d'analyse économique. Ensuite, on a téléchargé ces données dans un format approprié pour l'analyse dans R, tel que CSV, Excel.
+
+~*(Vous trouvez ci jointes toutes les bases de données en leurs états brutes : barrage.csv , cerales.csv , sonede.csv ,usage.xlsx , pluviometrie.csv )*~
+
+### [**Nettoyage des Données :**]{.underline}
+
+Dans cette étape, nous avons travaillé sur le nettoyage et la préparation des données pour l'analyse ultérieure , et on a procédé comme suit :
+
+1.  **Importation des données** : Les données ont été importées des fichiers CSV et Excel
+
+2.  **Conversion et enregistrement** : Les données provenant d'un fichier Excel ont été converties en format CSV pour assurer une uniformité .
+
+3.  **Nettoyage des données** :
+
+    -   Les colonnes non pertinentes ont été supprimées
+    -   Les lignes contenant des valeurs manquantes ont été éliminées .
+    -   Les valeurs qui ne respectent pas le format demandé ou ecrites en langue arabe dans certaines colonnes ont été supprimées .
+
+4.  **Transformation des données** :
+
+    -   Les colonnes contenant des dates ont été converties en types de données de date.
+    -   Normalisation des valeurs des colonnes en minuscules
+
+5.  **Création d'un nouveau jeu de données** : des nouveaux data frame issus de l'operation du nettoyage avec les pourcentages correspondants.
+
+    \*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\* code commenté correspondant a cette étape \*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*\*
+
+    ```{r}
+    library(readr)
+    #install.packages("readxl")
+    library(readxl)
+    # Importer les données de barrages
+    barrage <- read.csv("C:/Users/21629/OneDrive/Bureau/projet programmation R/barrages.csv")
+    # Importer les données de barrages
+    pluviometrie <- read.csv("C:/Users/21629/OneDrive/Bureau/projet programmation R/pluviometrie.csv")
+    # Importer les données de cereale
+    cereale <- read.csv("C:/Users/21629/OneDrive/Bureau/projet programmation R/cereale.csv")
+    head(cereale)
+    # Charger le fichier de usage
+    donnees <- read_excel("C:/Users/21629/OneDrive/Bureau/projet programmation R/usage.xlsx")
+    # Charger le fichier de sonede
+    sonede <- read_excel("C:/Users/21629/OneDrive/Bureau/projet programmation R/Sonede.xlsx")
+
+    # Convertir et enregistrer en format CSV
+    write.csv(sonede, "C:/Users/21629/OneDrive/Bureau/projet programmation R/Sonede.csv", row.names = FALSE)
+    head(sonede)
+    #class(sonede)
+    head(pluviometrie)
+    #class(pluviometrie)
+    #pour verifier que les donnees sont bien sous format frame
+    #class(barrage)
+    # Lire les premières lignes
+    head(barrage)
+
+    # Supprimer les colonnes Nom_Ar et Annee_prod
+    barrage <- subset(barrage, select = -c(Nom_Ar, Annee_prod))
+
+    # Supprimer des lignes avec des valeurs manquantes
+    barrage <- na.omit(barrage)
+    pluviometrie <- na.omit(pluviometrie)
+
+    # Supprimer des lignes avec des valeurs négatives dans la colonne apports
+    barrage <- barrage[barrage$apports >= 0, ]
+    pluviometrie <- pluviometrie[pluviometrie$Cumul_periode >= 0, ]
+    # Convertir les colonnes contenant des dates en types de données de date
+    barrage$Date <- as.Date(barrage$Date)
+    pluviometrie$Date <- as.Date(pluviometrie$Date)
+
+    # Normaliser les valeurs de la colonne Nom_Fr en minuscules
+    barrage$Nom_Fr <- tolower(barrage$Nom_Fr)
+    head(barrage)
+    donnees <- data.frame(
+      "Utilisation.principale" = c("Hydroélectricité", "Irrigation", "Alimentation en eau", "Loisirs, Navigation"),
+      "Pourcentage" = c("5 %", "60 %", "30 %", "5 %")
+    )
+    ```
+
+### [Outils utilisés pour Analyser les Données :]{.underline}
+
+Dans cette étape, on a utilisé des techniques d'analyse statistique pour explorer les données de maniere économiques. Cela inclut
+
+-   Des analyses de séries chronologiques : pour identifier les tendances et les variations dans les données au fil du temps , dans le cas du remplissage des barrages au cours de mois et du taux de precipitation au fil des annees
+
+-   Des corrélations : entre différentes variables économiques pour comprendre les relations entre elles et identifier les facteurs qui influent sur l'économie.
+
+-   Des rapport mathematiques : pour évaluer les relations causales entre les variables .
+
+## [**3-Analyse et Visualisation des données & interpretation des Résultats** :]{.underline}
+
+### 1-Le volumes des précipitations et le remplissage des barrages :
+
+##### \* code commenté correspondant aux volumes de précipitations et remplissage des barrages \*
+
+[a - volumes des precipitations :]{.underline}
+
+```{r}
+#install.packages("sf")
+#install.packages("ggplot2")
+#install.packages("leaflet")
+#install.packages("dplyr")
+#pour determiner annee a partir de date
+#install.packages("lubridate")
+library(lubridate)
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(shiny)
+library(leaflet)
+###visualisation de barrges
+# Charger les données des barrages à partir du data frame nettoyé 'barrage'
+barrages_sf <- st_as_sf(barrage, coords = c("Longitude", "Latitude"), crs = 4326)
+
+# Calculer le taux de remplissage
+barrage$Taux <- (barrage$stock / barrage$Cap_tot_act) * 100
+
+# Obtenir la gamme de valeurs de Taux
+taux_range <- range(barrage$Taux, na.rm = TRUE)
+my_palette <- rev(colorRampPalette(c("#FFFFFF", "#add8e6"))(100))  # Bleu clair
+# Générer une palette de couleurs correspondant à la gamme de valeurs de Taux
+color_palette <- colorNumeric(palette = my_palette, domain = taux_range)
+
+# Créer une carte interactive avec leaflet
+ma_carte_leaflet <- leaflet(data = barrages_sf) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    fillColor = ~color_palette(barrage$Taux), # correction
+    # Utiliser la palette de couleurs pour le taux de remplissage
+    color = "black",
+    weight = 1, 
+    radius = ~sqrt(Cap_tot_act) *2 ,  # Utiliser la racine carrée de la capacité pour le rayon
+    label = ~paste("Nom: ", Nom_Fr, "<br>",
+                   "Stock: ", stock, "<br>",
+                   "Capacité totale: ", Cap_tot_act, "<br>",
+                   "Taux: ", barrage$Taux, "%<br>"),
+     
+  )%>%
+  addLegend(position = "bottomright", 
+            pal = color_palette,
+            opacity = 1,
+            values = taux_range,
+            title = "Taux de remplissage (%)")
+
+
+# Afficher la carte interactive
+#ma_carte_leaflet
+###visualisation de pluviometrie
+# Extraire l'année à partir de la date
+pluviometrie$Annee <- format(pluviometrie$Date, "%Y")
+# Agréger les données de pluviométrie par année
+pluviometrie_an <- pluviometrie %>%
+  group_by(Annee) %>%
+  summarise(Cumul_periode_an = sum(Cumul_periode))
+# Créer un graphique en barres pour représenter la quantité de pluie par année
+ggplot(pluviometrie_an, aes(x = Annee, y = Cumul_periode_an)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Quantité de pluie par année",
+       x = "Année",
+       y = "Quantité de pluie (mm)") +
+  theme_minimal()
+# Définir les couleurs pour chaque année
+colors <- c("#1f77b4", "#ff7f0e", "#2ca02c", "#d62728")  
+
+# le pie chart
+ggplot(pluviometrie_an, aes(x = factor(1), y =Cumul_periode_an, fill = Annee)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y") +
+  scale_fill_manual(values = colors) +
+  labs(title = "Répartition de la quantité de pluie par année",
+       fill = "Année",
+       y = "Quantité de pluie (cm)") +
+  theme_void()  # Supprimer les éléments de la grille et de l'axe
+```
+
+##### [**Visualisation des Données :**]{.underline}
+
+Nous avons créer un diagramme en bâtons pour représenter les volumes de précipitations annuelles de 2021 à 2024. Chaque barre du diagramme représentera le volume de précipitations pour une année donnée.
+
+|                                   Diagramme en Bâtons                                   |                               Diagramme Circulaire                                |
+|:---------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------:|
+| Chaque barre du diagramme représente le volume de précipitations pour une année donnée. | Chaque portion du cercle montre le taux des précipitations pour une année donnée. |
+
+##### [**Interprétation des Résultats :**]{.underline}
+
+-   **Année 2021** : Les volumes de précipitations ont été très faibles , ce qui peut avoir entraîné des défis en matière de disponibilité d'eau pour divers secteurs.
+
+-   **Année 2022** : Nous avons observé une augmentation significative des volumes de précipitations en 2022, dépassant même les 6 millions d'unités. Cette augmentation pourrait avoir contribué à une amélioration des ressources en eau.
+
+-   **Années 2023 et 2024** : Les volumes de précipitations ont diminué en 2023 et 2024 par rapport à 2022. Cette diminution peut avoir des implications sur la disponibilité des ressources en eau pour l'agriculture, l'approvisionnement en eau potable, etc.
+
+    -   ~Remarque : Étant donné que la saison d'hiver a pris fin pour 2024, les augmentations futures des précipitations ne sont pas attendues pour être importantes, ce qui souligne l'importance de gérer efficacement les ressources en eau disponibles.~
+
+[b-Remplissage des barrages :]{.underline}
+
+> pour l [analyse]{.underline} des données de remplissage des barrages on a effectué le Calcul du taux de remplissage en suivant cette formule :
+>
+> =(stockage du barrage en eau / capacité du barrage) \* 100
+
+![](images/435147656_444373138002368_1504531525506797755_n.png)
+
+> [[\[ AFFICHER TOUTE LA CARTE \]]{.underline}](https://rpubs.com/rania_abderrazerk/1176576)
+
+##### [**Visualisation des Données :**]{.underline}
+
+**Carte Interactive** : Nous avons représenté ces données sur une carte interactive pour permettre une visualisation dynamique et informative , chaque bulle dans la carte porte les informations telles que : Nom ,Stockage ,capacité totale et le taux de ce barrage .
+
+##### [**Interprétation des Résultats :**]{.underline}
+
+Dans l'année 2024, le barrage de Sidisalem se démarque en tant que le barrage le plus rempli parmi ceux étudiés. Cependant, malgré cette position, le pourcentage de remplissage de ce barrage n'a pas dépassé les 30 %, ce qui reste très faible et en deçà de la norme attendue. Cette observation souligne les défis persistants en matière de disponibilité en eau, même pour les barrages les mieux remplis.
+
+### 3- Rapport entre les précipitations et le remplissage des barrages :
+
+> pour [Analyser]{.underline} la relation entre les précipitations et le remplissage des barrages on a effectué le rapport entre les deux := remplissage barrage/ taux de precipitations
+>
+> ^\[ toute conversions necesssaires des unités pour faire l'analyse était faite \]^
+
+\*\*\*code commenté correspondant au Rapport entre les précipitations et le remplissage des barrages\*\*
+
+```{r}
+library(lubridate)
+library(dplyr)
+library(sf)
+library(ggplot2)
+library(shiny)
+library(leaflet)
+
+### Calculer le rapport entre le remplissage des barrages et les précipitations pour les années 2023-2024
+# Filtrer les données de pluviométrie pour les dates spécifiées
+pluviometrie_2023 <- pluviometrie %>%
+  filter(Date >= ymd("2023-12-20") & Date <= ymd("2024-03-16"))
+
+# Extraire l'année à partir de la colonne Date pour les données de pluviométrie
+pluviometrie_2023$Annee <- year(pluviometrie_2023$Date)
+
+# Agréger les données de pluviométrie par année
+pluviometrie_annee <- pluviometrie_2023 %>%
+  group_by(Annee) %>%
+  summarise(Total_precipitations = sum(Cumul_periode))
+
+# Extraire l'année à partir de la colonne Date pour les données de barrage
+barrage$Annee <- year(barrage$Date)
+
+# Agréger les données des barrages par année et convertir les unités en millimètres cubes
+barrages_par_annee <- barrage %>%
+  group_by(Annee) %>%
+  summarise(Total_apports_mm = sum(apports) * 1000) # Convertir en millimètres cubes
+
+# Joindre les données de précipitations et de barrages par année
+donnees_annee <- merge(pluviometrie_annee, barrages_par_annee, by = "Annee")
+
+# Créer le graphique qui présente l'influence du pluie sur le stock
+ggplot(donnees_annee, aes(x = Annee)) +
+  geom_line(aes(y = Total_precipitations, color = "Précipitations"), linewidth = 1.5) +  # Courbe représentant les précipitations
+  geom_line(aes(y = Total_apports_mm, color = "augmentation du Stock des barrages"), linewidth = 1.5, linetype = "dashed") +  # Courbe représentant le stock des barrages
+  labs(title = "Variation des précipitations et du stock des barrages (2023-2024)",
+       x = "Année",
+       y = "Quantité (mm)",
+       color = "Variable") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Rotation des étiquettes de l'axe x
+  scale_color_manual(values = c("Précipitations" = "steelblue", "augmentation du Stock des barrages" = "red")) +  # Couleurs pour les courbes
+  theme(panel.grid.major = element_line(color = "gray", linetype = "dotted")) 
+
+## Créer un rapport 
+donnees_annee$Rapport <- (donnees_annee$Total_apports_mm / donnees_annee$Total_precipitations) * 100
+ggplot(donnees_annee, aes(x = Annee)) +
+  geom_bar(aes(y = Total_precipitations, fill = "Précipitations"), stat = "identity", width = 0.5) +
+  geom_bar(aes(y = Total_apports_mm, fill = "Stock des barrages"), stat = "identity", width = 0.5) +
+  labs(title = "Rapport entre stock des barrages et précipitations",
+       x = "Année",
+       y = "Quantité (mm)",
+       fill = "Variable") +
+  scale_fill_manual(values = c("Précipitations" = "steelblue", "Stock des barrages" = "red")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "top")  # Placer la légende en haut du graphique
+
+
+```
+
+##### [**Visualisation des Données :**]{.underline}
+
+-   **Diagrammes en Bâtons et Courbe** : Nous avons utilisé deux diagrammes :
+
+    en bâtons pour représenter les volumes de précipitations sur les années étudiées, ainsi qu'une courbe pour illustrer l'évolution du taux de remplissage des barrages au fil du temps.
+
+##### [**Interprétation des Résultats :**]{.underline}
+
+-   **Disparité entre Précipitations et Remplissage** : Cependant, malgré cette corrélation, il existe une grande disparité entre les volumes de précipitations et le taux de remplissage des barrages. Cette disparité est due à divers facteurs, tels que les pertes d'eau causées par l'évaporation, l'infiltration et les débits sortants des barrages.
+
+### 4-Repartition des utilisations principales de l’eau
+
+\*\*\*\*\*\*\*\*\*\* code commenté correspondant aux utilisations principales de l’eau \*\*\*\*\*\*\*\*\*\*\*\*
+
+```{r}
+library(ggplot2)
+# Changer le nom du dataset
+donnees_eau <- data.frame(
+  Utilisation.principale = c("Hydroélectricité", "Irrigation", "Alimentation en eau", "Loisirs, Navigation"),
+  Pourcentage = c(5, 60, 30, 5)
+)
+
+# Créer le pie chart avec le nouveau nom de dataset
+pie_chart <- ggplot(donnees_eau, aes(x = "", y = Pourcentage, fill = Utilisation.principale)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(Pourcentage, "%")), 
+            position = position_stack(vjust = 0.5), 
+            color = "white", 
+            size = 4) +  
+  labs(title = "Répartition des utilisations principales de l'eau",
+       fill = "Utilisation principale",
+       y = "Pourcentage") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# Afficher le pie chart
+print(pie_chart)
+```
+
+##### [Visualisation des Données :]{.underline}
+
+Utilisation d'un diagramme circulaire pour illustrer la répartition des utilisations principales de l'eau entre différentes catégories.
+
+##### [Interprétation des Résultats :]{.underline}
+
+-   Le diagramme circulaire met en évidence la répartition de l'utilisation de l'eau entre différentes fonctions.
+
+-   Environ 60 % de l'eau est utilisée pour l'irrigation, ce qui représente la plus grande part de l'utilisation totale.
+
+-   Environ 30 % de l'eau est consacrée à l'alimentation humaine et animale.
+
+-   Environ 5 % de l'eau est utilisée pour la production d'hydroélectricité, et les activités de loisirs et de navigation utilisent également environ 5 % de l'eau.
+
+\>\> En résumé, la répartition des utilisations principales de l'eau met en évidence le rôle crucial de cette ressource pour l'agriculture, largement dépendante de l'eau des barrages. Cependant, les efforts en matière d'énergie renouvelable en Tunisie n'ont pas encore pleinement exploité le potentiel de collaboration avec le secteur de l'eau.
+
+### 5-Tarification de la SONEDE :
+
+```{r}
+library(ggplot2)
+
+# Convertir les virgules en points dans les valeurs numériques
+sonede$`2023 (en dt)` <- as.numeric(gsub(",", ".", sonede$`2023 (en dt)`))
+sonede$`2024 (en dt)` <- as.numeric(gsub(",", ".", sonede$`2024 (en dt)`))
+
+# Convertir `tranche-metre-cube-par-trimestre` en facteur avec l'ordre approprié
+sonede$`tranche-metre-cube-par-trimestre` <- factor(sonede$`tranche-metre-cube-par-trimestre`, 
+                                                    levels = c("0-20", "20-40", "40-70", "70-100", "100-150", "150 et plus", "usage touristique"))
+
+# Créer le graphique avec les valeurs pivotées
+tarif_water_plot <- ggplot(sonede, aes(x = `tranche-metre-cube-par-trimestre`)) +
+  geom_bar(aes(y = `2024 (en dt)`, fill = "2024"), stat = "identity", position = "dodge") +
+  geom_bar(aes(y = `2023 (en dt)`, fill = "2023"), stat = "identity", position = "dodge") +
+  labs(title = "Augmentation du tarif de l'eau par tranche de consommation",
+       x = "Tranche de mètre cube par trimestre",
+       y = "Tarif (en dt)",
+       fill = "Année") +
+  scale_fill_manual(values = c("2023" = "red", "2024" = "blue")) +
+  theme_minimal()
+
+# Afficher le graphique
+print(tarif_water_plot)
+```
+
+##### [Visualisation des Données :]{.underline}
+
+Utilisation d'un diagramme en bâtons pour illustrer l'augmentation dans chaque tranche de mètre cube par trimestre.
+
+##### [Interprétation des Résultats :]{.underline}
+
+-   Le diagramme en bâtons met en évidence l'évolution des tarifs de la SONEDE pour chaque tranche de mètre cube au fil des trimestres.
+
+-   Il permet de visualiser clairement les augmentations de tarifs, fournissant une représentation graphique de la progression des coûts pour les différents niveaux de consommation d'eau.
+
+\>\> l'analyse suggère que les tarifs de la SONEDE peuvent être influencés par le remplissage des barrages. **Une corrélation** entre ces deux facteurs pourrait être observée, où une augmentation du remplissage des barrages pourrait potentiellement conduire à des ajustements tarifaires de la part de la SONEDE
+
+**Utilisation de la correlation pour l analyse :**
+
+la corrélation [entre les apports des barrages et les augmentations tarifaires]{.underline} est calculée pour chaque année à l'aide de la fonction cor(). La corrélation mesure la relation linéaire entre ces deux ensembles de données, indiquant dans quelle mesure les variations dans les apports des barrages sont associées aux variations des tarifs de Sonned. \>\> voici le code :
+
+```{r}
+library(dplyr)
+
+# Sélectionner les colonnes pertinentes
+barrage_corr <- barrage[, c("Date", "apports")]
+sonede_corr <- sonede[, c("id", "2023 (en dt)", "2024 (en dt)")]
+
+# Filtrez les données pour chaque année
+barrage_2023 <- filter(barrage_corr, Date >= "2023-01-01" & Date <= "2023-12-31")
+barrage_2024 <- filter(barrage_corr, Date >= "2024-01-01" & Date <= "2024-12-31")
+sonede_2023 <- filter(sonede_corr, !is.na(`2023 (en dt)`))  
+sonede_2024 <- filter(sonede_corr, !is.na(`2024 (en dt)`))
+
+# Assurez-vous que les données ont la même longueur
+min_length <- min(length(barrage_2023$apports), length(sonede_2023$`2023 (en dt)`))
+barrage_2023 <- head(barrage_2023, min_length)
+sonede_2023 <- head(sonede_2023, min_length)
+
+min_length <- min(length(barrage_2024$apports), length(sonede_2024$`2024 (en dt)`))
+barrage_2024 <- head(barrage_2024, min_length)
+sonede_2024 <- head(sonede_2024, min_length)
+
+# Calculer la corrélation entre la somme du stock des barrages et l'augmentation des tarifs pour chaque année
+correlation_2023 <- cor(barrage_2023$apports, sonede_2023$`2023 (en dt)`)
+correlation_2024 <- cor(barrage_2024$apports, sonede_2024$`2024 (en dt)`)
+
+# Afficher les résultats
+print(paste("Corrélation pour 2023 :", correlation_2023))
+print(paste("Corrélation pour 2024 :", correlation_2024))
+
+```
+
+Ce code permet d'évaluer la corrélation entre les apports des barrages et les augmentations tarifaires pour les années 2023 et 2024, offrant ainsi des insights sur la relation entre ces deux variables dans le contexte donné où la corrélation entre les apports des barrages et les tarifs de Sonede diminue en 2024 et qui peux atteindreun jour une valeure négative, cela suggère un changement dans la relation entre ces variables qui vont etre opposées .(diminution du remplissage des barrage \>\> rarete de l'eau \>\> augmentation des tarifs )
+
+### 6-Production des céréales :
+
+\*\*\*\*\*\*\*\*\*\* code commenté correspondant a la variation de la production des céréales\*\*\*\*\*\*\*\*\*\*\*\*
+
+```{r}
+
+#install.packages("tidyr")
+library(tidyr)
+library(ggplot2)
+# Renommer les colonnes
+colnames(cereale) <- c("Céréale", "X2014", "X2015", "X2016", "X2017", "X2018", "X2019", "X2020", "X2021", "X2022")
+head(cereale)
+# Transformer le jeu de données en format long
+cereale<- pivot_longer(cereale, cols = -Céréale, names_to = "Annee", values_to = "Production")
+# Convertir l'année en numérique
+cereale$Annee <- as.numeric(sub("X", "", cereale$Annee))
+
+# Créer le graphique
+ggplot(cereale, aes(x = Annee, y = as.numeric(Production), color = Céréale)) +
+  geom_line() +
+  labs(title = "Variation de production des céréales (2014-2022)",
+       x = "Année",
+       y = "Production (en milliers de tonnes)",
+       color = "Céréale") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+##### [Visualisation des Données :]{.underline}
+
+Utilisation d'un graphique en courbe pour représenter la production de céréales de 2014 à 2022.
+
+##### [Interprétation des Résultats :]{.underline}
+
+-   La courbe illustre une tendance générale à la baisse de la production de céréales au fil des années.
+
+-   Cette diminution peut être attribuée à divers facteurs tels que les conditions météorologiques défavorables, les changements dans les pratiques agricoles, les fluctuations des prix des intrants agricoles et surtout la diminution de l'eau dans les barrages.
+
+\>\> Malheureusement, Cette diminution soulève des préoccupations importantes quant à la sécurité alimentaire et à l'économie agricole. Il est crucial d'identifier les causes de cette diminution et de mettre en œuvre des mesures appropriées pour atténuer ses effets négatifs.
+
+## [**4-Des prédictions :**]{.underline}
+
+**Description de la prédiction :**
+
+1.  **Objectif :** L'objectif principal est de prédire les tarifs de la SONEDE pour l'année 2025 par tranche, en utilisant un modèle de régression linéaire.
+
+2.  **Méthode :** La méthode utilisée est la régression linéaire, qui est un modèle statistique couramment utilisé pour modéliser la relation entre une variable dépendante (dans ce cas, les tarifs de la SONEDE) et une ou plusieurs variables indépendantes (telles que les données historiques sur les tarifs, les coûts de production, etc.).
+
+3.  **Données :** Les données utilisées comprennent les tarifs historiques de la SONEDE, ainsi que d'autres variables pertinentes qui peuvent influencer les tarifs. Ces données sont divisées en ensembles d'entraînement et de test pour ajuster le modèle et évaluer sa performance.
+
+4.  **Ajustement du modèle :** Un modèle de régression linéaire est ajusté en utilisant les données d'entraînement, où les tarifs historiques sont la variable dépendante et les autres variables sont les variables indépendantes. Le modèle est ajusté pour minimiser l'erreur quadratique moyenne entre les valeurs observées et prédites.
+
+5.  **Évaluation du modèle :** La performance du modèle est évaluée en utilisant des mesures telles que le coefficient de détermination (R²) et l'erreur quadratique moyenne (RMSE) sur l'ensemble de test. Cela permet de vérifier si le modèle est capable de généraliser aux nouvelles données.
+
+6.  **Prédiction pour 2025 :** Une fois que le modèle est validé, il est utilisé pour prédire les tarifs de la SONEDE pour l'année 2025 en fonction des valeurs des variables indépendantes pour cette année-là.
+
+7.  **Interprétation des résultats :** Les résultats de la prédiction sont interprétés pour comprendre les facteurs qui influencent les tarifs de la SONÈDE en 2025 et formuler des recommandations en conséquence.
+
+    ```{r}
+    # Install and load the tidyverse package
+    #install.packages("tidyverse")
+    library(tidyverse)
+    library(ggplot2)
+
+    # Create the dataframe with the provided data
+    sonede_prediction_data <- sonede
+
+    # Rename the columns for ease of use
+    colnames(sonede_prediction_data)[3:4] <- c("prix_2023", "prix_2024")
+
+    # Adjust a linear regression model to predict water prices per bracket for the years 2025 to 2034
+    model <- lm(prix_2024 ~ prix_2023, data = sonede_prediction_data)
+
+    # Predict water prices per bracket for the years 2025 to 2034
+    predictions <- predict(model, newdata = data.frame(prix_2023 = sonede_prediction_data$prix_2024))
+
+    # Add predictions to the dataframe
+    sonede_prediction_data$`2025` <- predictions
+
+    # Calculate the difference between the predicted prices for 2025 and the prices for 2024
+    difference <- sonede_prediction_data$`2025` - sonede_prediction_data$prix_2024
+
+    # Create a new dataframe containing the bracket and the calculated difference
+    difference_data <- data.frame(tranche = sonede_prediction_data$`tranche-metre-cube-par-trimestre`, difference = difference)
+
+    # Convert the bracket variable into a factor with a specific order
+    difference_data$tranche <- factor(difference_data$tranche, levels = c("0-20", "20-40", "40-70", "70-100", "100-150", "150 et plus", "usage touristique"))
+
+    # Plot the curve with the bracket variable in the specified order
+    ggplot(difference_data, aes(x = tranche, y = difference)) +
+      geom_line(color = "green") +
+      geom_point(color = "red") +
+      geom_smooth(method = "lm", se = FALSE, color = "blue") +  # Add a linear regression line
+      labs(x = "Tranche", y = "Price Difference", title = "Prediction of water price increase per bracket in 2025") +
+      theme_minimal()
+    ```
+
+**\>\> Conclusions tirées a partir de la courbe de la prédiction :**
+
+1.  **Tendance à la hausse des prix** : La régression linéaire indique une tendance à la hausse des prix des tranches du Sonede dans le temps. Cela suggère que les tarifs de l'eau devraient augmenter progressivement pour refléter les coûts croissants de gestion et de distribution de l'eau.
+
+2.  **Impact de la rareté de l'eau** : L'augmentation des prix peut être liée à la rareté croissante de l'eau, qui peut être due à des facteurs tels que la diminution des ressources en eau disponibles ou l'augmentation de la demande en raison de la croissance démographique.
+
+3.  **Nécessité d'investissements** : L'augmentation des prix peut également refléter la nécessité pour Sonede d'investir dans des infrastructures de gestion de l'eau plus efficaces ou dans des technologies de dessalement pour répondre à la demande croissante en eau potable.
+
+4.  **Conséquences pour les consommateurs** : Une augmentation des prix de l'eau peut avoir des conséquences financières pour les consommateurs, en particulier pour ceux à revenu fixe ou à faible revenu. Cela souligne l'importance de politiques sociales pour atténuer l'impact sur les ménages vulnérables.
+
+5.  **Incitation à la conservation de l'eau** : Des prix plus élevés peuvent inciter les consommateurs à adopter des pratiques de conservation de l'eau et à utiliser l'eau de manière plus efficace, contribuant ainsi à la durabilité à long terme de la gestion des ressources en eau.
+
+## [5-Solutions :]{.underline}
+
+Propositions de quelques solutions qu on peut les adaptés au futur pour diminuer le danger de ce manque remarquable des ressources en eau:
+
+**1- la machine Kumulus :** qui révolutionne l'accès à l'eau potable en produisant jusqu'à 30 litres par jour, même dans les régions désertiques. cette machine exploite l'humidité de l'air pour fournir une source d'eau sûre et fiable. Cette solution autonome offre une réponse cruciale au défi mondial de la pénurie d'eau, en offrant une solution durable et accessible aux communautés isolées et aux zones arides.
+
+~\[[point negatif]{.underline} :le coût élevé de la machine peut limiter son accessibilité , on peut par exemple opter pour une strategie d'encouragement des entreprises privées à l'utiliser :exemple de réduction des impots pour les entrepises qui achetent cette machine\]~
+
+![](images/download.jpg){fig-align="center"}
+
+**2- L'installation de millions de boules en plastique dans les réservoirs d'eau:** offre une solution innovante pour lutter contre l'évaporation, préservant ainsi les ressources en eau. Cette approche ingénieuse réduit l'exposition de l'eau à l'air et au soleil, limitant ainsi la perte d'eau par évaporation. ~\[solution utilisée en USA\]~
+
+![](images/boules_noires_californie.jpg){fig-align="center"}
+
+**3-La dessalination de l'eau de mer :**
+
+représente une solution efficace pour répondre à la demande croissante en eau potable dans les régions souffrant de pénurie d'eau. En utilisant des technologies telles que l'osmose inverse, cette méthode élimine les sels et autres impuretés de l'eau de mer, la rendant ainsi sûre à boire.
+
+![](images/shutterstock_2233743015-870x566.jpg){fig-align="center"}
+
+**4- La création d'une serre** offre une solution pratique et durable pour cultiver des fruits, des légumes et des plantes tout au long de l'année, même dans des climats difficiles. elle protège les cultures des ravageurs et des variations de température, favorisant ainsi des rendements plus élevés des plantes. En plus elle contribue à la conservation de l'eau en permettant un contrôle plus précis de l'irrigation et en réduisant la perte d'eau par évaporation.
+
+![](images/VeYze2hQWCfQ_1200x500_EE_R0wWf.jpg){fig-align="center"}
+
+![](images/ligne-bleue-1.png){fig-align="center"}
+
+| [**Conclusion generale du projet :**]{.underline}
+| L'analyse des données météorologiques et hydrologiques met en évidence l'importance cruciale des précipitations pour les ressources en eau en Tunisie. Nous avons observé l'impact significatif des précipitations sur le remplissage des barrages, ainsi que ses répercussions sur la consommation d'eau quotidienne, l'irrigation agricole et l'économie nationale. Cette étude souligne l'urgence d'adopter des mesures efficaces pour une gestion durable de l'eau, notamment en renforçant les infrastructures hydrauliques, en promouvant des pratiques agricoles efficientes et en sensibilisant le public à l'importance de la préservation des ressources en eau. En outre, il est impératif de mettre en œuvre des politiques et des stratégies intégrées pour faire face aux défis croissants liés au changement climatique et à la pression démographique, afin de garantir un approvisionnement en eau adéquat pour les générations futures.
+
+![](images/ligne-bleue-1-03.png){fig-align="center"}
+
+#### *"Mieux vaut prendre le changement [par la main]{.underline} avant qu’il ne nous prenne [par la gorge]{.underline} "*
+
+^Winston Churchill^
+
+![](images/ligne-bleue-1-04.png)
+
+> ## [BIBLIOGRAPHIE :]{.underline}
+>
+> -   AgriData : <http://www.agridata.tn/>
+>
+> -   Data.Gov.tn :<https://Data.Gov.tn/fr/tn>
+>
+> -   Ministère de l'agriculture, des ressources hydrauliques et de la pêche :<http://www.agriculture.tn>
+
+![](images/8163-normes-de-citation.png){fig-align="center"}
